@@ -7,45 +7,11 @@ const PREVIEW_MESSAGES = [
   { id: 2, content: "I'm doing great! Just working on some new features.", isSent: true },
 ];
 
-// Theme Preview Component
-const ThemePreview = ({ themeName, isSelected, onClick }) => {
-  return (
-    <button
-      className={`
-        group flex flex-col items-center gap-1.5 p-2 rounded-lg transition-all cursor-pointer
-        ${isSelected ? "" : "hover:bg-base-200/50"}
-      `}
-      onClick={onClick}
-    >
-      <div className="relative h-8 w-full" data-theme={themeName}>
-        <div 
-          className={`h-full rounded-md overflow-hidden ${
-            isSelected ? "" : "border border-base-300/50"
-          }`}
-        >
-          <div className="h-full grid grid-cols-4 gap-0.5 p-0.5">
-            <div className="rounded-sm bg-primary"></div>
-            <div className="rounded-sm bg-secondary"></div>
-            <div className="rounded-sm bg-accent"></div>
-            <div className="rounded-sm bg-neutral"></div>
-          </div>
-        </div>
-        {isSelected && (
-          <div className="absolute -inset-0.5 rounded-md ring-2 ring-primary ring-offset-2 ring-offset-base-100 pointer-events-none"></div>
-        )}
-      </div>
-      <span className="text-[11px] font-medium truncate w-full text-center text-base-content">
-        {themeName.charAt(0).toUpperCase() + themeName.slice(1)}
-      </span>
-    </button>
-  );
-};
-
 const SettingsPage = () => {
   const { theme, setTheme } = useThemeStore();
 
   return (
-    <div className="h-screen container mx-auto px-4 pt-20 max-w-5xl">
+    <div className="h-screen  mx-auto px-4 pt-20 max-w-4xl">
       <div className="space-y-6">
         <div className="flex flex-col gap-1">
           <h2 className="text-lg font-semibold">Theme</h2>
@@ -54,12 +20,26 @@ const SettingsPage = () => {
 
         <div className="grid grid-cols-4 sm:grid-cols-6 md:grid-cols-8 gap-2">
           {THEMES.map((t) => (
-            <ThemePreview
+            <button
               key={t}
-              themeName={t}
-              isSelected={theme === t}
+              className={`
+                group flex flex-col items-center gap-1.5 p-2 rounded-lg transition-colors
+                ${theme === t ? "bg-base-200" : "hover:bg-base-200/50"}
+              `}
               onClick={() => setTheme(t)}
-            />
+            >
+              <div className="relative h-8 w-full rounded-md overflow-hidden" data-theme={t}>
+                <div className="absolute inset-0 grid grid-cols-4 gap-px p-1">
+                  <div className="rounded bg-primary"></div>
+                  <div className="rounded bg-secondary"></div>
+                  <div className="rounded bg-accent"></div>
+                  <div className="rounded bg-neutral"></div>
+                </div>
+              </div>
+              <span className="text-[11px] font-medium truncate w-full text-center">
+                {t.charAt(0).toUpperCase() + t.slice(1)}
+              </span>
+            </button>
           ))}
         </div>
 
@@ -74,10 +54,10 @@ const SettingsPage = () => {
                 <div className="px-4 py-3 border-b border-base-300 bg-base-100">
                   <div className="flex items-center gap-3">
                     <div className="w-8 h-8 rounded-full bg-primary flex items-center justify-center text-primary-content font-medium">
-                      M
+                      J
                     </div>
                     <div>
-                      <h3 className="font-medium text-sm">Mikiyas Beyene</h3>
+                      <h3 className="font-medium text-sm">John Doe</h3>
                       <p className="text-xs text-base-content/70">Online</p>
                     </div>
                   </div>

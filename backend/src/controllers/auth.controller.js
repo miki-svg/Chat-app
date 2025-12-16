@@ -87,32 +87,107 @@ export const logout = (req, res) => {
 
 export const updateProfile = async (req, res) => {
   try {
-    const { profilePic } = req.body;
+    // IMPORTANT: Get ALL data from req.body
+    const { profilePic, username, email } = req.body;
     const userId = req.user._id;
 
+    console.log("Received update data:", { 
+      hasProfilePic: !!profilePic, 
+      profilePicLength: profilePic?.length,
+      username, 
+      email 
+    });
+
     if (!profilePic) {
-      return res.status(400).json({ message: "Profile pic is required" });
+      return res.status(400).json({ 
+        message: "Profile picture is required" 
+      });
     }
 
-    const uploadResponse = await cloudinary.uploader.upload(profilePic);
+    // Validate that it's a base64 image string
+    if (!profilePic.startsWith('data:image/')) {
+      return res.status(400).json({ 
+        message: "Invalid image format. Please upload a valid image file." 
+      });
+    }
+
+    // Upload to Cloudinary
+    const uploadResponse = await cloudinary.uploader.upload(profilePic, {
+      folder: 'chat-app/profile-pictures',
+      public_id: `user_${userId}_${Date.now()}`,
+      overwrite: false, // Don't overwrite - create new version
+      transformation: [
+        { width: 400, height: 400, crop: 'fill', gravity: 'face' },
+        { quality: 'auto:good' }
+      ]
+    });
+
+    // Prepare update data
+    const updateData = {
+      profilePic: uploadResponse.secure_url
+    };
+    
+    // Optionally update other fields if provided
+    if (username) updateData.username = username;
+    if (email) updateData.email = email;
+
+    // Update user in database
     const updatedUser = await User.findByIdAndUpdate(
       userId,
-      { profilePic: uploadResponse.secure_url },
+      { $set: updateData },
       { new: true }
-    );
+    ).select('-password');
 
+    console.log("Profile updated successfully for user:", userId);
+    
     res.status(200).json(updatedUser);
   } catch (error) {
-    console.log("error in update profile:", error);
-    res.status(500).json({ message: "Internal server error" });
+    console.log("Error in update profile:", error);
+    
+    // Provide specific error messages
+    if (error.message.includes('Invalid image file')) {
+      return res.status(400).json({ 
+        message: "The image file appears to be corrupted or invalid." 
+      });
+    }
+    
+    if (error.http_code === 400) { // Cloudinary error
+      return res.status(400).json({ 
+        message: "Cloudinary rejected the image. It may be too large or in an unsupported format." 
+      });
+    }
+    
+    res.status(500).json({ 
+      message: "Failed to update profile",
+      ...(process.env.NODE_ENV === 'development' && { 
+        error: error.message,
+        stack: error.stack 
+      })
+    });
   }
+  
 };
-
 export const checkAuth = (req, res) => {
   try {
     res.status(200).json(req.user);
   } catch (error) {
     console.log("Error in checkAuth controller", error.message);
     res.status(500).json({ message: "Internal Server Error" });
+  }
+};
+export const testCloudinary = async (req, res) => {
+  try {
+    // Simple test to verify Cloudinary is configured
+    const testResult = await cloudinary.api.ping();
+    res.status(200).json({ 
+      message: "Cloudinary is configured correctly",
+      cloudinary: testResult 
+    });
+  } catch (error) {
+    console.log("Cloudinary configuration error:", error.message);
+    res.status(500).json({ 
+      message: "Cloudinary configuration error",
+      error: error.message 
+    });
   }
 };
