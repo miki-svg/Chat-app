@@ -11,6 +11,7 @@
   },
   "dependencies": {
     "axios": "^1.13.2",
+    "chat-app": "file:..",
     "date-fns": "^4.1.0",
     "lucide-react": "^0.556.0",
     "react": "^19.2.0",
@@ -18,6 +19,7 @@
     "react-hot-toast": "^2.6.0",
     "react-icons": "^5.5.0",
     "react-router-dom": "^7.10.1",
+    "socket.io-client": "^4.8.1",
     "uuid": "^13.0.0",
     "zustand": "^5.0.9"
   },

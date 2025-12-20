@@ -21,10 +21,9 @@ const ChatContainer = () => {
   useEffect(() => {
     getMessages(selectedUser._id);
 
-    // Subscribe to real-time messages for this user
-   
+   subscribeToMessages();
 
-    // Cleanup: unsubscribe when component unmounts or user changes
+    return () => unsubscribeFromMessages();
    
   }, [selectedUser._id, getMessages, subscribeToMessages, unsubscribeFromMessages]);
 
